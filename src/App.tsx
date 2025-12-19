@@ -54,7 +54,7 @@ function App() {
   const fetchResults = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('gemini_v2', {
+      const { data, error } = await supabase.rpc('gemini_v3', {
         p_subject: activeSubject,
       });
 
@@ -90,7 +90,7 @@ function App() {
 
     setStoring((prev) => ({ ...prev, [key]: true }));
     try {
-      const { data, error } = await supabase.rpc('moon_v2', {
+      const { data, error } = await supabase.rpc('moon_v3', {
         p_subject: activeSubject,
         p_react_order_final_new: react_order_final_new,
         p_url: url,
