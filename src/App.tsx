@@ -59,6 +59,7 @@ function App() {
       });
 
       if (error) throw error;
+
       setResults(data || []);
       setUrlInputs({});
       setStoredImages({});
@@ -70,9 +71,9 @@ function App() {
     }
   };
 
-  const handleSearchGoogle = (imageText: string) => {
+  const handleSearchGoogle = (imageSearch: string) => {
     const searchUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(
-      imageText
+      imageSearch
     )}`;
     window.open(searchUrl, '_blank');
   };
@@ -83,7 +84,7 @@ function App() {
 
   const handleStoreUrl = async (
     key: string,
-    react_order_final_new: number
+    react_order_final: number
   ) => {
     const url = urlInputs[key];
     if (!url || !url.trim()) return;
@@ -92,7 +93,7 @@ function App() {
     try {
       const { data, error } = await supabase.rpc('moon_v3', {
         p_subject: activeSubject,
-        p_react_order_final_new: react_order_final_new,
+        p_react_order_final: react_order_final,
         p_url: url,
       });
 
@@ -112,21 +113,19 @@ function App() {
   };
 
   const getCurrentImageUrl = (result: ImageResult): string | null => {
-  const key = String(result.react_order_final_new);
-  return storedImages[key]?.image_url || result.image_url || null;
-};
+    const key = String(result.react_order_final);
+    return storedImages[key]?.image_url || result.image_url || null;
+  };
 
+  const notAddedResults = results.filter((r) => {
+    const key = String(r.react_order_final);
+    return !r.image_url && !storedImages[key];
+  });
 
- const notAddedResults = results.filter((r) => {
-  const key = String(r.react_order_final_new);
-  return !r.image_url && !storedImages[key];
-});
-
-const addedResults = results.filter((r) => {
-  const key = String(r.react_order_final_new);
-  return r.image_url || storedImages[key];
-});
-
+  const addedResults = results.filter((r) => {
+    const key = String(r.react_order_final);
+    return r.image_url || storedImages[key];
+  });
 
   const displayResults =
     activeTab === 'not-added' ? notAddedResults : addedResults;
@@ -197,7 +196,7 @@ const addedResults = results.filter((r) => {
             </div>
           ) : (
             displayResults.map((result) => {
-              const key = String(result.react_order_final_new);
+              const key = String(result.react_order_final);
 
               return (
                 <div
@@ -205,15 +204,15 @@ const addedResults = results.filter((r) => {
                   className="bg-[#1a1a1a] rounded-2xl p-5 border border-[#2a2a2a]"
                 >
                   <p className="text-xs text-[#606060] mb-2 font-mono">
-                    Order: {result.react_order_final_new}
+                    Order: {result.react_order_final}
                   </p>
 
                   <p className="text-sm text-[#b0b0b0] mb-4">
-                    {result.image}
+                    {result.image_search}
                   </p>
 
                   <button
-                    onClick={() => handleSearchGoogle(result.image)}
+                    onClick={() => handleSearchGoogle(result.image_search)}
                     className="bg-[#25D366] text-[#0a0a0a] text-xs font-bold px-3 py-1.5 rounded-xl mb-3"
                   >
                     Search Google Images
@@ -223,17 +222,15 @@ const addedResults = results.filter((r) => {
                     type="text"
                     placeholder="Paste image URL here…"
                     value={urlInputs[key] || ''}
-                    onChange={(e) =>
-                      handleUrlChange(key, e.target.value)
-                    }
-                  className="w-full bg-[#121212] border border-[#404040] rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#606060] mb-3"
+                    onChange={(e) => handleUrlChange(key, e.target.value)}
+                    className="w-full bg-[#121212] border border-[#404040] rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#606060] mb-3"
                   />
 
                   <button
                     onClick={() =>
                       handleStoreUrl(
                         key,
-                        result.react_order_final_new
+                        result.react_order_final
                       )
                     }
                     disabled={storing[key]}
@@ -242,7 +239,7 @@ const addedResults = results.filter((r) => {
                     {storing[key] ? 'Storing...' : 'Store URL'}
                   </button>
 
-                                    {(() => {
+                  {(() => {
                     const currentImageUrl = getCurrentImageUrl(result);
                     return currentImageUrl ? (
                       <div className="mt-4">
