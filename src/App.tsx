@@ -29,9 +29,9 @@ const SUBJECTS = [
 ];
 
 interface ImageResult {
-  image: string;
-  react_order_final_new: number;
-  image_url: string | null;   // 👈 ADD THIS
+  image_search: string;
+  react_order_final: number;
+  image_url: string | null;
 }
 
 interface StoredImage {
